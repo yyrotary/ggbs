@@ -208,14 +208,43 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                                             {customer.transactions.map((tx: any, tIdx: number) => (
                                                 <div key={tIdx} className="bg-white/5 rounded-2xl p-4 group/item hover:bg-white/10 transition-all border border-transparent hover:border-[#D4AF37]/20">
                                                     <div className="flex justify-between items-start">
-                                                        <div className="space-y-1">
-                                                            <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-bold">
-                                                                <Calendar size={12} /> {tx.saleDate}
+                                                        <div className="flex-1 space-y-3">
+                                                            {/* Date & Product */}
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-bold">
+                                                                    <Calendar size={12} /> {tx.saleDate}
+                                                                </div>
+                                                                <div className="text-lg font-black text-white">{tx.productName}</div>
                                                             </div>
-                                                            <div className="text-lg font-black text-white">{tx.productName}</div>
-                                                            <div className="text-xl font-bold text-white">
-                                                                ₩{tx.totalAmount?.toLocaleString()}
+
+                                                            {/* Detailed Pricing Grid */}
+                                                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 py-3 px-4 bg-black/30 rounded-xl border border-white/5">
+                                                                <div className="flex justify-between items-baseline">
+                                                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">단가</span>
+                                                                    <span className="text-sm font-bold text-gray-300">₩{tx.unitPrice?.toLocaleString()}</span>
+                                                                </div>
+                                                                <div className="flex justify-between items-baseline">
+                                                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">수량</span>
+                                                                    <span className="text-sm font-bold text-gray-300">{tx.quantity}</span>
+                                                                </div>
+                                                                <div className="flex justify-between items-baseline">
+                                                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">공급가액</span>
+                                                                    <span className="text-sm font-bold text-gray-300">₩{tx.supplyAmount?.toLocaleString()}</span>
+                                                                </div>
+                                                                <div className="flex justify-between items-baseline">
+                                                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">부가세</span>
+                                                                    <span className="text-sm font-bold text-gray-300">₩{tx.vat?.toLocaleString()}</span>
+                                                                </div>
                                                             </div>
+
+                                                            {/* Total Price */}
+                                                            <div className="flex justify-between items-center pt-1">
+                                                                <span className="text-xs font-black text-[#D4AF37] uppercase tracking-widest">총 판매금액</span>
+                                                                <div className="text-2xl font-black text-[#D4AF37] gold-text-gradient">
+                                                                    ₩{tx.totalAmount?.toLocaleString()}
+                                                                </div>
+                                                            </div>
+
                                                             {tx.remarks && (
                                                                 <div className="text-sm text-gray-500 mt-2 italic px-3 py-1 bg-white/5 rounded-lg border-l-2 border-[#D4AF37]">
                                                                     {tx.remarks}
@@ -224,7 +253,7 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                                                         </div>
                                                         <button
                                                             onClick={() => handleDelete(tx.rowId)}
-                                                            className="p-2 text-red-400 opacity-20 group-hover/item:opacity-100 hover:bg-red-400/10 rounded-lg transition-all"
+                                                            className="p-2 text-red-400 opacity-20 group-hover/item:opacity-100 hover:bg-red-400/10 rounded-lg transition-all ml-4"
                                                         >
                                                             <Trash2 size={20} />
                                                         </button>
