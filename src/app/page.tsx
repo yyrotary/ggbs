@@ -35,7 +35,7 @@ export default function HomePage() {
             <header className="space-y-4 text-center py-4">
               <h2 className="text-5xl font-extrabold leading-[1.2] tracking-tight text-white">
                 품격 있는 <br />
-                <span className="gold-text-gradient">보석 관리</span>
+                <span className="gold-text-gradient">고객 관리</span>
               </h2>
             </header>
 
