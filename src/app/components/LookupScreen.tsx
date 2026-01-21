@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, Phone, User, Calendar, Tag, Trash2, ArrowLeft, Loader2, Diamond, Hash, ChevronLeft, ChevronRight, X, MapPin, ReceiptText } from "lucide-react";
+import { Search, Phone, User, Calendar, Tag, Trash2, ArrowLeft, Loader2, Diamond, Hash, ChevronLeft, ChevronRight, X, MapPin, ReceiptText, FileText } from "lucide-react";
 
 export default function LookupScreen({ onBack }: { onBack: () => void }) {
     const [searchTerm, setSearchTerm] = useState("");
@@ -204,58 +204,66 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                                             <span className="text-xs font-black text-gray-500 uppercase tracking-widest">거래 내역 ({customer.transactions.length})</span>
                                         </div>
 
-                                        <div className="space-y-3">
+                                        <div className="space-y-4">
                                             {customer.transactions.map((tx: any, tIdx: number) => (
-                                                <div key={tIdx} className="bg-white/5 rounded-2xl p-4 group/item hover:bg-white/10 transition-all border border-transparent hover:border-[#D4AF37]/20">
+                                                <div key={tIdx} className="bg-white/5 rounded-[2rem] p-6 group/item hover:bg-white/10 transition-all border border-white/5 hover:border-[#D4AF37]/30">
                                                     <div className="flex justify-between items-start">
-                                                        <div className="flex-1 space-y-3">
-                                                            {/* Date & Product */}
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-bold">
-                                                                    <Calendar size={12} /> {tx.saleDate}
+                                                        <div className="flex-1 space-y-4">
+                                                            {/* Date & Product Header */}
+                                                            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                                                                <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-black uppercase tracking-tighter">
+                                                                    <Calendar size={14} /> {tx.saleDate}
                                                                 </div>
-                                                                <div className="text-lg font-black text-white">{tx.productName}</div>
-                                                            </div>
-
-                                                            {/* Detailed Pricing Grid */}
-                                                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 py-3 px-4 bg-black/30 rounded-xl border border-white/5">
-                                                                <div className="flex justify-between items-baseline">
-                                                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">단가</span>
-                                                                    <span className="text-sm font-bold text-gray-300">₩{tx.unitPrice?.toLocaleString()}</span>
-                                                                </div>
-                                                                <div className="flex justify-between items-baseline">
-                                                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">수량</span>
-                                                                    <span className="text-sm font-bold text-gray-300">{tx.quantity}</span>
-                                                                </div>
-                                                                <div className="flex justify-between items-baseline">
-                                                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">공급가액</span>
-                                                                    <span className="text-sm font-bold text-gray-300">₩{tx.supplyAmount?.toLocaleString()}</span>
-                                                                </div>
-                                                                <div className="flex justify-between items-baseline">
-                                                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">부가세</span>
-                                                                    <span className="text-sm font-bold text-gray-300">₩{tx.vat?.toLocaleString()}</span>
+                                                                <div className="text-xl font-black text-white flex items-center gap-2">
+                                                                    <Tag size={18} className="text-[#D4AF37]" />
+                                                                    {tx.productName}
                                                                 </div>
                                                             </div>
 
-                                                            {/* Total Price */}
-                                                            <div className="flex justify-between items-center pt-1">
-                                                                <span className="text-xs font-black text-[#D4AF37] uppercase tracking-widest">총 판매금액</span>
-                                                                <div className="text-2xl font-black text-[#D4AF37] gold-text-gradient">
-                                                                    ₩{tx.totalAmount?.toLocaleString()}
+                                                            {/* Pricing Layout */}
+                                                            <div className="grid grid-cols-2 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest pl-1">단가/수량</p>
+                                                                    <p className="text-base font-bold text-gray-200 pl-1">
+                                                                        ₩{tx.unitPrice?.toLocaleString()} <span className="text-[#D4AF37]/60 ml-1">× {tx.quantity}</span>
+                                                                    </p>
+                                                                </div>
+                                                                <div className="space-y-1 text-right">
+                                                                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest pr-1">최종 판매금액</p>
+                                                                    <p className="text-2xl font-black text-[#D4AF37] gold-text-gradient">
+                                                                        ₩{tx.totalAmount?.toLocaleString()}
+                                                                    </p>
                                                                 </div>
                                                             </div>
 
+                                                            {/* Detailed breakdown (optional/smaller) */}
+                                                            <div className="flex justify-between items-center text-[10px] bg-black/20 rounded-xl px-4 py-2 text-gray-500 font-bold border border-white/5">
+                                                                <span>공급가액: ₩{tx.supplyAmount?.toLocaleString()}</span>
+                                                                <div className="w-px h-2 bg-white/10"></div>
+                                                                <span>부가세: ₩{tx.vat?.toLocaleString()}</span>
+                                                            </div>
+
+                                                            {/* Remarks - Styled for character/note look */}
                                                             {tx.remarks && (
-                                                                <div className="text-sm text-gray-500 mt-2 italic px-3 py-1 bg-white/5 rounded-lg border-l-2 border-[#D4AF37]">
-                                                                    {tx.remarks}
+                                                                <div className="relative mt-2 p-5 bg-[#D4AF37]/5 rounded-2xl border-l-4 border-[#D4AF37] group-hover/item:bg-[#D4AF37]/10 transition-colors">
+                                                                    <div className="absolute top-3 right-4 opacity-10">
+                                                                        <FileText size={40} />
+                                                                    </div>
+                                                                    <p className="text-[10px] text-[#D4AF37] font-black uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                                        <FileText size={12} /> 비고 / 참고사항
+                                                                    </p>
+                                                                    <p className="text-base font-medium text-gray-200 leading-relaxed relative z-10 whitespace-pre-wrap">
+                                                                        {tx.remarks}
+                                                                    </p>
                                                                 </div>
                                                             )}
                                                         </div>
                                                         <button
                                                             onClick={() => handleDelete(tx.rowId)}
-                                                            className="p-2 text-red-400 opacity-20 group-hover/item:opacity-100 hover:bg-red-400/10 rounded-lg transition-all ml-4"
+                                                            className="p-3 text-red-400 opacity-20 group-hover/item:opacity-100 hover:bg-red-400/10 rounded-xl transition-all ml-4"
+                                                            title="삭제"
                                                         >
-                                                            <Trash2 size={20} />
+                                                            <Trash2 size={24} />
                                                         </button>
                                                     </div>
                                                 </div>
