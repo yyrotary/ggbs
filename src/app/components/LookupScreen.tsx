@@ -175,23 +175,31 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                                                     <User size={32} />
                                                 </div>
                                                 <div>
+                                                    <div className="text-[10px] text-[#D4AF37]/60 font-black uppercase tracking-widest mb-1 pl-1">성명</div>
                                                     <h3 className="text-3xl font-black text-white leading-tight">{customer.customerName}</h3>
-                                                    <div className="flex items-center gap-2 text-[#D4AF37] font-bold text-sm">
-                                                        <Hash size={14} /> {customer.customerNo || "미등록 고객"}
+                                                    <div className="flex items-center gap-2 text-[#D4AF37] font-bold text-sm mt-1">
+                                                        <span className="text-[10px] opacity-50 font-black tracking-widest uppercase">고객번호:</span>
+                                                        {customer.customerNo || "미등록 고객"}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-3 pl-2">
-                                            <div className="flex items-center gap-3 text-lg font-bold text-white/90">
-                                                <Phone size={18} className="text-[#D4AF37]" />
+                                        <div className="space-y-4 pl-2">
+                                            <div className="flex items-center gap-4 text-xl font-bold text-white/90">
+                                                <div className="flex items-center gap-2 min-w-[70px] text-gray-500 text-[11px] font-black uppercase tracking-widest border border-white/10 px-2 py-1.5 rounded-lg bg-white/5">
+                                                    <Phone size={14} className="text-[#D4AF37]" />
+                                                    전화
+                                                </div>
                                                 {customer.phone}
                                             </div>
                                             {customer.address && (
-                                                <div className="flex items-start gap-3 text-base text-gray-400 font-medium">
-                                                    <MapPin size={18} className="text-[#D4AF37] shrink-0 mt-1" />
-                                                    {customer.address}
+                                                <div className="flex items-start gap-4 text-base text-gray-400 font-medium">
+                                                    <div className="flex items-center gap-2 min-w-[70px] text-gray-500 text-[11px] font-black uppercase tracking-widest border border-white/10 px-2 py-1.5 rounded-lg bg-white/5 mt-0.5">
+                                                        <MapPin size={14} className="text-[#D4AF37]" />
+                                                        주소
+                                                    </div>
+                                                    <span className="pt-1">{customer.address}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -212,10 +220,12 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                                                             {/* Date & Product Header */}
                                                             <div className="flex items-center justify-between border-b border-white/5 pb-3">
                                                                 <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-black uppercase tracking-tighter">
-                                                                    <Calendar size={14} /> {tx.saleDate}
+                                                                    <Calendar size={14} />
+                                                                    <span className="opacity-50">판매일:</span>
+                                                                    {tx.saleDate}
                                                                 </div>
                                                                 <div className="text-xl font-black text-white flex items-center gap-2">
-                                                                    <Tag size={18} className="text-[#D4AF37]" />
+                                                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-1">품목:</span>
                                                                     {tx.productName}
                                                                 </div>
                                                             </div>
