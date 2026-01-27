@@ -51,7 +51,7 @@ export default function HomePage() {
                     <UserPlus size={40} strokeWidth={2.5} />
                   </div>
                   <div>
-                    <h3 className="text-3xl font-black text-white leading-snug">판매 등록</h3>
+                    <h3 className="text-3xl font-black text-white leading-snug">거래 등록</h3>
                     <p className="text-[#D4AF37] text-lg font-medium opacity-90">새 고객 및 거래 입력</p>
                   </div>
                 </div>

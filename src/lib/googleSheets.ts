@@ -15,7 +15,7 @@ async function getSheetsInstance() {
 export async function appendToSheet(values: any[]) {
     const sheets = await getSheetsInstance();
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const range = "Sheet1!A:L"; // Adjusted for 12 fields + timestamp? No, precisely 12 fields.
+    const range = "Sheet1!A:M"; // Adjusted for 13 fields (incl. transactionType)
 
     const response = await sheets.spreadsheets.values.append({
         spreadsheetId,
@@ -32,7 +32,7 @@ export async function appendToSheet(values: any[]) {
 export async function lookupFromSheet(name: string, phone: string) {
     const sheets = await getSheetsInstance();
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const range = "Sheet1!A:L";
+    const range = "Sheet1!A:M";
 
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId,
@@ -66,6 +66,7 @@ export async function lookupFromSheet(name: string, phone: string) {
                 vat: row[9],
                 totalAmount: row[10],
                 remarks: row[11],
+                transactionType: row[12] || "판매", // Default to Sales if missing
             };
         });
 }
@@ -73,7 +74,7 @@ export async function lookupFromSheet(name: string, phone: string) {
 export async function getAllSales() {
     const sheets = await getSheetsInstance();
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    const range = "Sheet1!A:L";
+    const range = "Sheet1!A:M";
 
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId,
@@ -99,6 +100,7 @@ export async function getAllSales() {
         vat: parseFloat(row[9]?.toString().replace(/[^0-9.-]+/g, "") || "0"),
         totalAmount: parseFloat(row[10]?.toString().replace(/[^0-9.-]+/g, "") || "0"),
         remarks: row[11],
+        transactionType: row[12] || "판매",
     }));
 }
 

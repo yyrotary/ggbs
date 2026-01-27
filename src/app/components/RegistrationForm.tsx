@@ -9,6 +9,7 @@ import {
 
 export default function RegistrationForm({ onBack }: { onBack: () => void }) {
     const [formData, setFormData] = useState({
+        transactionType: "판매", // Default to Sales
         saleDate: new Date().toISOString().split("T")[0],
         customerName: "",
         customerNo: "",
@@ -121,6 +122,7 @@ export default function RegistrationForm({ onBack }: { onBack: () => void }) {
             if (result.success) {
                 alert("거래가 성공적으로 저장되었습니다.");
                 setFormData({
+                    transactionType: "판매",
                     saleDate: new Date().toISOString().split("T")[0],
                     customerName: "",
                     customerNo: "",
@@ -156,7 +158,7 @@ export default function RegistrationForm({ onBack }: { onBack: () => void }) {
                     <div className="flex items-center gap-3">
                         <Diamond size={24} className="text-[#D4AF37] fill-[#D4AF37]" />
                         <h2 className="text-white text-2xl font-black leading-tight tracking-tight text-center font-display">
-                            판매 등록
+                            거래 등록
                         </h2>
                     </div>
                     <div className="size-12"></div> {/* Spacer for alignment */}
@@ -165,6 +167,30 @@ export default function RegistrationForm({ onBack }: { onBack: () => void }) {
 
             <main className="max-w-lg mx-auto space-y-8 px-6 py-8">
                 <form id="salesForm" onSubmit={handleSubmit} className="space-y-8">
+                    {/* 0. 거래 구분 (Transaction Type) */}
+                    <div className="bg-white/5 p-2 rounded-2xl border border-[#D4AF37]/30 flex p-1">
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, transactionType: "판매", unitPrice: 0, quantity: 1, remarks: "" }))}
+                            className={`flex-1 py-4 rounded-xl text-lg font-black transition-all ${formData.transactionType === "판매"
+                                    ? "bg-[#D4AF37] text-[#0D0B14] shadow-lg"
+                                    : "text-gray-400 hover:text-white"
+                                }`}
+                        >
+                            판매
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, transactionType: "판매 외", unitPrice: 0, quantity: 0, remarks: "" }))}
+                            className={`flex-1 py-4 rounded-xl text-lg font-black transition-all ${formData.transactionType === "판매 외"
+                                    ? "bg-[#D4AF37] text-[#0D0B14] shadow-lg show-gold-glow"
+                                    : "text-gray-400 hover:text-white"
+                                }`}
+                        >
+                            판매 외 (맡김 등)
+                        </button>
+                    </div>
+
                     {/* 1. 판매일자 */}
                     <FormField label="판매일자" icon={<Calendar size={20} />}>
                         <input
@@ -252,51 +278,55 @@ export default function RegistrationForm({ onBack }: { onBack: () => void }) {
                         />
                     </FormField>
 
-                    {/* 7. 단가 & 8. 수량 */}
-                    <div className="grid grid-cols-2 gap-6">
-                        <FormField label="단가" icon={<CreditCard size={20} />}>
-                            <div className="relative">
-                                <input
-                                    type="number"
-                                    name="unitPrice"
-                                    value={formData.unitPrice || ""}
-                                    onChange={handleChange}
-                                    placeholder="0"
-                                    className="w-full bg-white/5 border border-[#D4AF37]/30 rounded-2xl h-16 pl-8 pr-4 text-xl font-bold focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all placeholder:text-gray-600"
-                                    required
-                                />
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₩</span>
+                    {/* 7. 단가 & 8. 수량 - Show only if "판매" (Sales) is selected, or make optional/zero-able for others */}
+                    {formData.transactionType === "판매" && (
+                        <>
+                            <div className="grid grid-cols-2 gap-6">
+                                <FormField label="단가" icon={<CreditCard size={20} />}>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            name="unitPrice"
+                                            value={formData.unitPrice || ""}
+                                            onChange={handleChange}
+                                            placeholder="0"
+                                            className="w-full bg-white/5 border border-[#D4AF37]/30 rounded-2xl h-16 pl-8 pr-4 text-xl font-bold focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all placeholder:text-gray-600"
+                                            required={formData.transactionType === "판매"}
+                                        />
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₩</span>
+                                    </div>
+                                </FormField>
+                                <FormField label="수량" icon={<ShoppingBag size={20} />}>
+                                    <input
+                                        type="number"
+                                        name="quantity"
+                                        value={formData.quantity}
+                                        onChange={handleChange}
+                                        placeholder="1"
+                                        className="w-full bg-white/5 border border-[#D4AF37]/30 rounded-2xl h-16 px-4 text-xl font-bold focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all placeholder:text-gray-600 text-center"
+                                        required={formData.transactionType === "판매"}
+                                    />
+                                </FormField>
                             </div>
-                        </FormField>
-                        <FormField label="수량" icon={<ShoppingBag size={20} />}>
-                            <input
-                                type="number"
-                                name="quantity"
-                                value={formData.quantity}
-                                onChange={handleChange}
-                                placeholder="1"
-                                className="w-full bg-white/5 border border-[#D4AF37]/30 rounded-2xl h-16 px-4 text-xl font-bold focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all placeholder:text-gray-600 text-center"
-                                required
-                            />
-                        </FormField>
-                    </div>
 
-                    {/* 9. 공급가액, 10. 부가세액, 11. 판매금액 */}
-                    <div className="bg-gradient-to-br from-[#2D2616] to-[#0D0B14] rounded-3xl p-8 border border-[#D4AF37]/30 space-y-5 gold-glow">
-                        <div className="flex justify-between items-center text-lg font-medium text-gray-400">
-                            <span>공급가액</span>
-                            <span className="text-white font-bold">₩ {calculations.supplyAmount.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-lg font-medium text-gray-400">
-                            <span>부가세액</span>
-                            <span className="text-white font-bold">₩ {calculations.vat.toLocaleString()}</span>
-                        </div>
-                        <div className="h-px bg-[#D4AF37]/30 w-full my-2"></div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-xl font-black tracking-tight text-[#D4AF37]">판매금액</span>
-                            <span className="text-[#D4AF37] text-3xl font-black tabular-nums gold-text-gradient">₩ {calculations.totalAmount.toLocaleString()}</span>
-                        </div>
-                    </div>
+                            {/* 9. 공급가액, 10. 부가세액, 11. 판매금액 */}
+                            <div className="bg-gradient-to-br from-[#2D2616] to-[#0D0B14] rounded-3xl p-8 border border-[#D4AF37]/30 space-y-5 gold-glow">
+                                <div className="flex justify-between items-center text-lg font-medium text-gray-400">
+                                    <span>공급가액</span>
+                                    <span className="text-white font-bold">₩ {calculations.supplyAmount.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-lg font-medium text-gray-400">
+                                    <span>부가세액</span>
+                                    <span className="text-white font-bold">₩ {calculations.vat.toLocaleString()}</span>
+                                </div>
+                                <div className="h-px bg-[#D4AF37]/30 w-full my-2"></div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xl font-black tracking-tight text-[#D4AF37]">판매금액</span>
+                                    <span className="text-[#D4AF37] text-3xl font-black tabular-nums gold-text-gradient">₩ {calculations.totalAmount.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     {/* 12. 비고 */}
                     <FormField label="비고" icon={<FileText size={20} />}>

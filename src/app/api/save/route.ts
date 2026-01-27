@@ -7,13 +7,13 @@ export async function POST(req: Request) {
         const {
             saleDate, customerName, customerNo, phone, address,
             productName, unitPrice, quantity, supplyAmount, vat,
-            totalAmount, remarks
+            totalAmount, remarks, transactionType
         } = body;
 
         const row = [
             saleDate, customerName, customerNo, phone, address,
             productName, unitPrice, quantity, supplyAmount, vat,
-            totalAmount, remarks
+            totalAmount, remarks, transactionType
         ];
 
         await appendToSheet(row);

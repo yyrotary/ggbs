@@ -219,10 +219,18 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                                                         <div className="flex-1 space-y-4">
                                                             {/* Date & Product Header */}
                                                             <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                                                                <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-black uppercase tracking-tighter">
-                                                                    <Calendar size={14} />
-                                                                    <span className="opacity-50">판매일:</span>
-                                                                    {tx.saleDate}
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className={`px-2 py-1 rounded-md text-[10px] font-black ${(tx.transactionType === '판매' || !tx.transactionType)
+                                                                            ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
+                                                                            : 'bg-slate-700 text-slate-300'
+                                                                        }`}>
+                                                                        {tx.transactionType || '판매'}
+                                                                    </span>
+                                                                    <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-black uppercase tracking-tighter">
+                                                                        <Calendar size={14} />
+                                                                        <span className="opacity-50">거래일:</span>
+                                                                        {tx.saleDate}
+                                                                    </div>
                                                                 </div>
                                                                 <div className="text-xl font-black text-white flex items-center gap-2">
                                                                     <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-1">품목:</span>
