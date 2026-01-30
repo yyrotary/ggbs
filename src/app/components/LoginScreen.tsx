@@ -69,7 +69,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                     </div>
                     <h2 className="text-2xl font-bold text-white mb-2">로그인</h2>
                     <p className="text-slate-400">간편 비밀번호 6자리를 입력하세요</p>
-                    <p className="text-xs text-slate-600 mt-2">(초기: 123456)</p>
+
                 </div>
 
                 {/* PIN Display */}
@@ -78,8 +78,8 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                         <div
                             key={i}
                             className={`w-4 h-4 rounded-full transition-all duration-300 ${i < pin.length
-                                    ? "bg-[#D4AF37] scale-110 shadow-[0_0_10px_#D4AF37]"
-                                    : "bg-slate-700"
+                                ? "bg-[#D4AF37] scale-110 shadow-[0_0_10px_#D4AF37]"
+                                : "bg-slate-700"
                                 } ${error ? "bg-red-500 animate-pulse" : ""}`}
                         />
                     ))}
