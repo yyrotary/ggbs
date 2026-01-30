@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { getAllSales, getSettings } from "@/lib/googleSheets";
 
 export async function GET(req: Request) {
