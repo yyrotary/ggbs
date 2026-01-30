@@ -5,9 +5,16 @@ import { UserPlus, Search, Printer, Diamond, Bell, ChevronRight, ShieldCheck, Gl
 import RegistrationForm from "./components/RegistrationForm";
 import LookupScreen from "./components/LookupScreen";
 import StatsScreen from "./components/StatsScreen";
+import LoginScreen from "./components/LoginScreen";
+import SettingsScreen from "./components/SettingsScreen";
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<"home" | "register" | "lookup" | "stats">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "register" | "lookup" | "stats" | "settings">("home");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  if (!isLoggedIn) {
+    return <LoginScreen onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
 
   return (
     <main className="min-h-screen font-sans selection:bg-primary/30 pb-28">
@@ -97,10 +104,13 @@ export default function HomePage() {
           {/* Bottom Nav - Korean & Large */}
           <nav className="fixed bottom-0 left-0 right-0 bg-[#0D0B14]/95 backdrop-blur-2xl border-t-2 border-[#D4AF37]/20 pb-10 pt-5 z-50">
             <div className="max-w-lg mx-auto flex justify-around items-center px-6">
-              <div className="flex flex-col items-center gap-2 text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">
+              <button
+                onClick={() => setActiveTab("home")}
+                className="flex flex-col items-center gap-2 text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]"
+              >
                 <Home size={32} fill="currentColor" />
                 <span className="text-sm font-black tracking-wide">홈</span>
-              </div>
+              </button>
               <div className="flex flex-col items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors">
                 <Database size={32} />
                 <span className="text-sm font-black tracking-wide">보관함</span>
@@ -109,10 +119,13 @@ export default function HomePage() {
                 <Layers size={32} />
                 <span className="text-sm font-black tracking-wide">목록</span>
               </div>
-              <div className="flex flex-col items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors">
+              <button
+                onClick={() => setActiveTab("settings")}
+                className="flex flex-col items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors hover:text-[#D4AF37]"
+              >
                 <Settings size={32} />
                 <span className="text-sm font-black tracking-wide">설정</span>
-              </div>
+              </button>
             </div>
           </nav>
         </div>
@@ -127,6 +140,9 @@ export default function HomePage() {
       )}
       {activeTab === "stats" && (
         <StatsScreen onBack={() => setActiveTab("home")} />
+      )}
+      {activeTab === "settings" && (
+        <SettingsScreen onBack={() => setActiveTab("home")} />
       )}
     </main>
   );

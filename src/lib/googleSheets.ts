@@ -161,3 +161,152 @@ export async function deleteRow(rowId: number) {
         },
     });
 }
+
+/**
+ * Ensures that the "Settings" sheet exists.
+ * If not, creates it and initializes with default simple_password = 123456.
+ */
+export async function ensureSettingsSheet() {
+    const sheets = await getSheetsInstance();
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+
+    // 1. Check if "Settings" sheet exists, create if missing
+    const metadata = await sheets.spreadsheets.get({ spreadsheetId });
+    const settingsSheet = metadata.data.sheets?.find(s => s.properties?.title === "Settings");
+
+    if (!settingsSheet) {
+        await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: {
+                requests: [
+                    {
+                        addSheet: {
+                            properties: {
+                                title: "Settings",
+                            },
+                        },
+                    },
+                ],
+            },
+        });
+    }
+
+    // 2. Read current settings to check what's missing
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Settings!A:B",
+    });
+
+    const rows = response.data.values || [];
+    const existingKeys = new Set(rows.map(row => row[0]));
+
+    const REQUIRED_DEFAULTS: Record<string, string> = {
+        "simple_password": "123456",
+        "supplier_name": "금가보석",
+        "supplier_ceo": "홍길동",
+        "supplier_reg_no": "123-45-67890",
+        "supplier_address": "서울시 종로구 돈화문로 123",
+        "supplier_phone": "010-0000-0000",
+    };
+
+    const valuesToAppend: string[][] = [];
+
+    // Add Header if sheet is completely empty
+    if (rows.length === 0) {
+        valuesToAppend.push(["Key", "Value"]);
+    }
+
+    // Check for missing keys
+    for (const [key, defaultValue] of Object.entries(REQUIRED_DEFAULTS)) {
+        if (!existingKeys.has(key)) {
+            valuesToAppend.push([key, defaultValue]);
+        }
+    }
+
+    // 3. Append missing values
+    if (valuesToAppend.length > 0) {
+        await sheets.spreadsheets.values.append({
+            spreadsheetId,
+            range: "Settings!A:B",
+            valueInputOption: "RAW",
+            requestBody: {
+                values: valuesToAppend,
+            },
+        });
+    }
+}
+
+export async function getSettings() {
+    await ensureSettingsSheet();
+    const sheets = await getSheetsInstance();
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Settings!A:B",
+    });
+
+    const rows = response.data.values || [];
+    // Convert to object
+    const settings: any = {};
+    rows.forEach(row => {
+        if (row[0] && row[0] !== "Key") {
+            settings[row[0]] = row[1] || "";
+        }
+    });
+
+    return settings;
+}
+
+export async function updateSettings(updates: { key: string; value: string }[]) {
+    await ensureSettingsSheet();
+    const sheets = await getSheetsInstance();
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+
+    // Read current settings to find rows
+    const response = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Settings!A:B",
+    });
+
+    const rows = response.data.values || [];
+    const requests: any[] = [];
+
+    for (const { key, value } of updates) {
+        let rowIndex = rows.findIndex(row => row[0] === key);
+
+        if (rowIndex === -1) {
+            // Append new key
+            await sheets.spreadsheets.values.append({
+                spreadsheetId,
+                range: "Settings!A:B",
+                valueInputOption: "RAW",
+                requestBody: {
+                    values: [[key, value]],
+                },
+            });
+            // Update local rows cache if we were to continue (but append is simple)
+        } else {
+            // Update existing
+            const sheetRow = rowIndex + 1;
+            await sheets.spreadsheets.values.update({
+                spreadsheetId,
+                range: `Settings!B${sheetRow}`,
+                valueInputOption: "RAW",
+                requestBody: {
+                    values: [[value]],
+                },
+            });
+        }
+    }
+}
+
+export async function verifyPassword(inputPassword: string): Promise<boolean> {
+    const settings = await getSettings();
+    const storedPassword = settings["simple_password"] || "123456";
+    return storedPassword === inputPassword;
+}
+
+export async function updatePassword(newPassword: string) {
+    await updateSettings([{ key: "simple_password", value: newPassword }]);
+}

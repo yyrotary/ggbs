@@ -220,118 +220,196 @@ export default function StatsScreen({ onBack }: { onBack: () => void }) {
                         )}
 
                         {/* Professional Print Layout (White Background) */}
-                        <div className="hidden print:block space-y-12 pt-12 text-black bg-white">
-                            {/* Header Section */}
-                            <div className="text-center space-y-4 border-b-4 border-black pb-8">
-                                <h1 className="text-5xl font-black tracking-tighter">판매 분석 보고서</h1>
-                                <div className="flex justify-between items-end px-2">
-                                    <div className="text-left space-y-1">
-                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Client</p>
-                                        <p className="text-lg font-black italic">금가보석 (GEUM-GA)</p>
+                        <div className="hidden print:block text-black bg-white h-full relative">
+                            {/* Document Header */}
+                            <header className="border-b-[3px] border-black pb-6 mb-8 flex justify-between items-end">
+                                <div>
+                                    <h1 className="text-4xl font-serif font-black tracking-widest mb-2">매 출 분 석 보 고 서</h1>
+                                    <p className="text-sm font-medium text-gray-500">Sales Analysis Report</p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="flex items-center gap-2 justify-end mb-1">
+                                        <Diamond className="w-5 h-5 text-[#D4AF37] fill-[#D4AF37]" />
+                                        <span className="text-xl font-bold tracking-tight">{stats.supplierInfo?.supplier_name || "금가보석"}</span>
                                     </div>
-                                    <div className="text-right space-y-1">
-                                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Analysis Period</p>
-                                        <p className="text-lg font-black">
-                                            {period === "all" ? "전체 기간" : (period === "custom" ? `${dateRange.start} ~ ${dateRange.end}` : periodLabels[period])}
-                                        </p>
-                                    </div>
+                                    <p className="text-xs text-gray-500">Tel: {stats.supplierInfo?.supplier_phone || "010-0000-0000"}</p>
+                                    <p className="text-xs text-gray-500">{stats.supplierInfo?.supplier_address || "서울시 종로구 돈화문로"}</p>
+                                </div>
+                            </header>
+
+                            {/* Info Section */}
+                            <div className="grid grid-cols-2 gap-8 mb-10 text-sm break-inside-avoid">
+                                {/* Analysis Info */}
+                                <div className="border border-gray-300 p-4 rounded-sm">
+                                    <h3 className="font-bold border-b border-gray-300 pb-2 mb-3 text-lg flex justify-between">
+                                        분석 기간 <span className="font-normal text-xs mt-1">(Period)</span>
+                                    </h3>
+                                    <table className="w-full">
+                                        <tbody>
+                                            <tr>
+                                                <td className="py-1 text-gray-500 w-24">기 간 구 분</td>
+                                                <td className="font-bold text-lg">
+                                                    {periodLabels[period]}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-1 text-gray-500">시 작 일</td>
+                                                <td>
+                                                    {period === 'custom' ? dateRange.start :
+                                                        period === 'today' ? new Date().toISOString().split("T")[0] :
+                                                            period === 'month' ? new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0] : '-'}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-1 text-gray-500">종 료 일</td>
+                                                <td>
+                                                    {period === 'custom' ? dateRange.end :
+                                                        period === 'today' ? new Date().toISOString().split("T")[0] :
+                                                            period === 'month' ? new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split("T")[0] : '-'}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Supplier Info */}
+                                <div className="border border-gray-300 p-4 rounded-sm bg-gray-50 print:bg-transparent">
+                                    <h3 className="font-bold border-b border-gray-300 pb-2 mb-3 text-lg flex justify-between">
+                                        발행자 <span className="font-normal text-xs mt-1">(Issuer)</span>
+                                    </h3>
+                                    <table className="w-full">
+                                        <tbody>
+                                            <tr>
+                                                <td className="py-1 text-gray-500 w-20">상 호</td>
+                                                <td className="font-bold">{stats.supplierInfo?.supplier_name || "금가보석"}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-1 text-gray-500">대 표 자</td>
+                                                <td>{stats.supplierInfo?.supplier_ceo || "홍 길 동"}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-1 text-gray-500">사업자번호</td>
+                                                <td>{stats.supplierInfo?.supplier_reg_no || "123-45-67890"}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-1 text-gray-500 align-top">주 소</td>
+                                                <td>{stats.supplierInfo?.supplier_address || "서울시 종로구 돈화문로 123"}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
 
-                            {/* Metrics Summary */}
-                            <div className="grid grid-cols-2 gap-12 bg-gray-50 p-10 border border-black rounded-3xl">
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-6 bg-black"></div>
-                                        <p className="text-sm font-black uppercase tracking-widest text-gray-500">매출 총계</p>
-                                    </div>
-                                    <p className="text-5xl font-black">₩ {stats.totalRevenue.toLocaleString()}</p>
-                                </div>
-                                <div className="space-y-4 border-l border-black/10 pl-12">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-6 bg-black"></div>
-                                        <p className="text-sm font-black uppercase tracking-widest text-gray-500">판매 건수</p>
-                                    </div>
-                                    <p className="text-5xl font-black">{stats.salesCount}건</p>
-                                </div>
-                            </div>
-
-                            {/* Popular Products Summary */}
-                            <div className="space-y-6 break-inside-avoid">
-                                <div className="flex items-center gap-3">
-                                    <Package size={24} strokeWidth={3} />
-                                    <h3 className="text-2xl font-black tracking-tight">주요 품목별 실적 (TOP 5)</h3>
-                                </div>
-                                <table className="w-full text-left border-t-2 border-black border-collapse">
+                            {/* Metrics Summary Table */}
+                            <div className="mb-10 break-inside-avoid">
+                                <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                                    <div className="w-1 h-5 bg-black"></div>
+                                    요약 (Summary)
+                                </h3>
+                                <table className="w-full text-sm border-collapse border border-black">
                                     <thead>
-                                        <tr className="bg-gray-100 uppercase text-[10px] font-black tracking-widest text-gray-600 border-b border-black">
-                                            <th className="py-4 px-4">품목명</th>
-                                            <th className="py-4 px-4 text-center">판매수</th>
-                                            <th className="py-4 px-4 text-right">매출합계</th>
+                                        <tr className="bg-gray-100 print:bg-gray-100/50">
+                                            <th className="border border-black py-2 px-4 text-left">항목</th>
+                                            <th className="border border-black py-2 px-4 text-right">내용</th>
+                                            <th className="border border-black py-2 px-4 text-left">비고</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {stats.topProducts.map((p: any, i: number) => (
-                                            <tr key={i} className="border-b border-gray-200 font-bold">
-                                                <td className="py-4 px-4 text-base italic">{p.name}</td>
-                                                <td className="py-4 px-4 text-center tabular-nums">{p.count}</td>
-                                                <td className="py-4 px-4 text-right tabular-nums text-lg">₩ {p.revenue.toLocaleString()}</td>
-                                            </tr>
-                                        ))}
+                                        <tr>
+                                            <td className="border border-black py-3 px-4 font-bold">총 매출액</td>
+                                            <td className="border border-black py-3 px-4 text-right font-black text-xl">
+                                                ₩ {stats.totalRevenue.toLocaleString()}
+                                            </td>
+                                            <td className="border border-black py-3 px-4 text-gray-500 text-xs">VAT 포함</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="border border-black py-3 px-4 font-bold">총 판매 건수</td>
+                                            <td className="border border-black py-3 px-4 text-right font-bold">
+                                                {stats.salesCount} 건
+                                            </td>
+                                            <td className="border border-black py-3 px-4 text-gray-500 text-xs"></td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
 
-                            {/* Full Transaction List - The main table document */}
-                            <div className="space-y-6 pt-10">
-                                <div className="flex items-center gap-3">
-                                    <Calendar size={24} strokeWidth={3} />
-                                    <h3 className="text-2xl font-black tracking-tight">상세 거래 명세서 (전체 데이터)</h3>
+                            {/* Top Products Table */}
+                            {stats.topProducts.length > 0 && (
+                                <div className="mb-10 break-inside-avoid">
+                                    <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                                        <div className="w-1 h-5 bg-black"></div>
+                                        주요 품목 실적 (Top 5 Products)
+                                    </h3>
+                                    <table className="w-full text-sm border-collapse border border-black">
+                                        <thead>
+                                            <tr className="bg-gray-100 print:bg-gray-100/50">
+                                                <th className="border border-black py-2 px-2 w-[10%] text-center">순위</th>
+                                                <th className="border border-black py-2 px-2 text-left">품목명</th>
+                                                <th className="border border-black py-2 px-2 w-[15%] text-center">판매수</th>
+                                                <th className="border border-black py-2 px-2 w-[25%] text-right">매출액</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {stats.topProducts.map((p: any, i: number) => (
+                                                <tr key={i}>
+                                                    <td className="border border-black py-2 px-2 text-center text-xs">{i + 1}</td>
+                                                    <td className="border border-black py-2 px-2 font-medium">{p.name}</td>
+                                                    <td className="border border-black py-2 px-2 text-center">{p.count}</td>
+                                                    <td className="border border-black py-2 px-2 text-right font-bold">₩ {p.revenue.toLocaleString()}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <table className="w-full text-left border-t-2 border-black border-collapse">
+                            )}
+
+                            {/* Full Transaction List */}
+                            <div className="mb-12">
+                                <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                                    <div className="w-1 h-5 bg-black"></div>
+                                    상세 거래 내역 (Details)
+                                </h3>
+                                <table className="w-full text-sm border-collapse border border-black">
                                     <thead>
-                                        <tr className="bg-gray-100 uppercase text-[10px] font-black tracking-widest text-gray-600 border-b border-black">
-                                            <th className="py-4 px-4">판매일자</th>
-                                            <th className="py-4 px-4">고객명</th>
-                                            <th className="py-4 px-4">품목명</th>
-                                            <th className="py-4 px-4 text-right">판매금액</th>
-                                            <th className="py-4 px-4">비고</th>
+                                        <tr className="bg-gray-100 print:bg-gray-100/50 text-xs">
+                                            <th className="border border-black py-2 px-2 w-[12%]">날짜</th>
+                                            <th className="border border-black py-2 px-2 w-[15%]">고객명</th>
+                                            <th className="border border-black py-2 px-2">품목</th>
+                                            <th className="border border-black py-2 px-2 w-[10%] text-right">단가</th>
+                                            <th className="border border-black py-2 px-2 w-[8%] text-center">수량</th>
+                                            <th className="border border-black py-2 px-2 w-[15%] text-right">합계</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {(stats.filteredSales || []).map((sale: any, i: number) => (
-                                            <tr key={i} className="border-b border-gray-100 hover:bg-gray-50 transition-colors break-inside-avoid">
-                                                <td className="py-4 px-4 text-xs font-bold tabular-nums text-gray-500">{sale.saleDate}</td>
-                                                <td className="py-4 px-4 text-sm font-black">{sale.customerName}</td>
-                                                <td className="py-4 px-4 text-sm font-bold text-gray-700">{sale.productName}</td>
-                                                <td className="py-4 px-4 text-right text-sm font-black tabular-nums">₩ {(sale.totalAmount || 0).toLocaleString()}</td>
-                                                <td className="py-4 px-4 text-xs font-medium text-gray-400 italic max-w-[100px] truncate">{sale.remark || "-"}</td>
+                                            <tr key={i} className="break-inside-avoid">
+                                                <td className="border border-black py-2 px-2 text-center text-xs">{sale.saleDate}</td>
+                                                <td className="border border-black py-2 px-2 text-xs font-bold">{sale.customerName}</td>
+                                                <td className="border border-black py-2 px-2 text-xs">{sale.productName}</td>
+                                                <td className="border border-black py-2 px-2 text-right text-xs">{sale.unitPrice?.toLocaleString()}</td>
+                                                <td className="border border-black py-2 px-2 text-center text-xs">{sale.quantity}</td>
+                                                <td className="border border-black py-2 px-2 text-right text-xs font-bold">₩ {(sale.totalAmount || 0).toLocaleString()}</td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
 
-                            {/* Footer & Signature */}
-                            <div className="pt-40 text-center flex flex-col items-center gap-12 break-inside-avoid text-black">
-                                <div className="space-y-4">
-                                    <p className="text-sm font-black text-gray-400 uppercase tracking-[0.4em]">Authorized Signature</p>
-                                    <div className="w-64 h-[2px] bg-black"></div>
-                                    <p className="text-2xl font-display font-black tracking-[0.2em] italic">GEUM-GA JEWELRY</p>
-                                    <div className="flex items-center justify-center gap-4 text-sm font-bold pt-4 text-gray-600">
-                                        <span>대표이사 박영수</span>
-                                        <div className="size-16 border-4 border-red-600 rounded-full flex items-center justify-center text-red-600 font-black rotate-[-15deg] opacity-80 select-none">
-                                            금가보석
-                                        </div>
+                            {/* Footer */}
+                            <div className="text-center pt-8 border-t border-gray-300 mt-10 break-inside-avoid">
+                                <p className="text-lg font-serif font-bold mb-8">위와 같이 매출 내역을 보고합니다.</p>
+                                <div className="flex justify-end gap-16 px-10">
+                                    <div className="text-center">
+                                        <p className="mb-4 text-sm text-gray-500">작성자 (서명/인)</p>
+                                        <p className="font-serif font-black text-xl">{stats.supplierInfo?.supplier_ceo || "홍 길 동"}</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="mb-4 text-sm text-gray-500">승인자 (서명/인)</p>
+                                        <p className="font-serif font-black text-xl text-gray-300">Signature</p>
                                     </div>
                                 </div>
-                                <div className="space-y-1 text-gray-400">
-                                    <p className="text-[10px] italic uppercase">
-                                        This document is electronically generated and contains confidential financial data.
-                                    </p>
-                                    <p className="text-[10px] font-black uppercase">
-                                        Printed at {new Date().toLocaleString()} from GEUM-GA Premium Management System
-                                    </p>
+                                <div className="mt-8 text-[10px] text-gray-400 uppercase">
+                                    Generated by {stats.supplierInfo?.supplier_name ? `${stats.supplierInfo.supplier_name} ` : 'GEUM-GA '} Premium Management System at {new Date().toLocaleString()}
                                 </div>
                             </div>
                         </div>

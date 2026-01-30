@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, Phone, User, Calendar, Tag, Trash2, ArrowLeft, Loader2, Diamond, Hash, ChevronLeft, ChevronRight, X, MapPin, ReceiptText, FileText } from "lucide-react";
+import { Search, Phone, User, Calendar, Tag, Trash2, ArrowLeft, Loader2, Diamond, Hash, ChevronLeft, ChevronRight, X, MapPin, ReceiptText, FileText, Printer } from "lucide-react";
+import TransactionStatement from "./TransactionStatement";
 
 export default function LookupScreen({ onBack }: { onBack: () => void }) {
     const [searchTerm, setSearchTerm] = useState("");
@@ -11,6 +12,25 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
     const [page, setPage] = useState(1);
     const limit = 50; // Fetch more to allow grouping, though API actually handles paging. 
     // For specific customer grouping, it's better to group what we searched.
+
+    const [printingCustomer, setPrintingCustomer] = useState<any | null>(null);
+
+    const [supplierInfo, setSupplierInfo] = useState<any>(null);
+
+    useEffect(() => {
+        // Fetch supplier info for printing
+        fetch("/api/settings")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.settings) {
+                    setSupplierInfo({
+                        supplier_name: data.settings.supplier_name,
+                        supplier_ceo: data.settings.supplier_ceo,
+                        supplier_info: data.settings // Pass full object if needed, or specific fields
+                    });
+                }
+            });
+    }, []);
 
     const performSearch = useCallback(async (currentSearchTerm: string) => {
         if (!currentSearchTerm.trim()) {
@@ -183,6 +203,13 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                                                     </div>
                                                 </div>
                                             </div>
+                                            <button
+                                                onClick={() => setPrintingCustomer(customer)}
+                                                className="bg-[#D4AF37]/10 p-3 rounded-xl border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37] hover:text-[#0D0B14] transition-all shadow-lg"
+                                                title="거래 명세서 출력"
+                                            >
+                                                <Printer size={24} />
+                                            </button>
                                         </div>
 
                                         <div className="space-y-4 pl-2">
@@ -221,8 +248,8 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                                                             <div className="flex items-center justify-between border-b border-white/5 pb-3">
                                                                 <div className="flex items-center gap-3">
                                                                     <span className={`px-2 py-1 rounded-md text-[10px] font-black ${(tx.transactionType === '판매' || !tx.transactionType)
-                                                                            ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
-                                                                            : 'bg-slate-700 text-slate-300'
+                                                                        ? 'bg-[#D4AF37]/20 text-[#D4AF37]'
+                                                                        : 'bg-slate-700 text-slate-300'
                                                                         }`}>
                                                                         {tx.transactionType || '판매'}
                                                                     </span>
@@ -301,6 +328,16 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                     )}
                 </div>
             </main>
+
+            {/* Print Modal */}
+            {printingCustomer && (
+                <TransactionStatement
+                    customer={printingCustomer}
+                    transactions={printingCustomer.transactions}
+                    supplierInfo={supplierInfo?.supplier_info} // Pass supplier info
+                    onClose={() => setPrintingCustomer(null)}
+                />
+            )}
         </div>
     );
 }

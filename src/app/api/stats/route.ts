@@ -1,5 +1,4 @@
-import { NextResponse } from "next/server";
-import { getAllSales } from "@/lib/googleSheets";
+import { getAllSales, getSettings } from "@/lib/googleSheets";
 
 export async function GET(req: Request) {
     try {
@@ -7,10 +6,15 @@ export async function GET(req: Request) {
         const startDate = searchParams.get("startDate");
         const endDate = searchParams.get("endDate");
 
-        let sales = await getAllSales();
+        const [sales, settings] = await Promise.all([
+            getAllSales(),
+            getSettings()
+        ]);
+
+        let filteredSales = sales;
 
         if (startDate || endDate) {
-            sales = sales.filter(s => {
+            filteredSales = sales.filter(s => {
                 const saleDate = new Date(s.saleDate);
                 if (startDate && saleDate < new Date(startDate)) return false;
                 if (endDate && saleDate > new Date(endDate)) return false;
@@ -18,7 +22,7 @@ export async function GET(req: Request) {
             });
         }
 
-        if (!sales || sales.length === 0) {
+        if (!filteredSales || filteredSales.length === 0) {
             return NextResponse.json({
                 success: true,
                 stats: {
@@ -26,17 +30,18 @@ export async function GET(req: Request) {
                     salesCount: 0,
                     avgOrderValue: 0,
                     topProducts: [],
-                    recentSales: []
+                    recentSales: [],
+                    supplierInfo: settings
                 }
             });
         }
 
-        const totalRevenue = sales.reduce((sum, s) => sum + (s.totalAmount || 0), 0);
-        const salesCount = sales.length;
+        const totalRevenue = filteredSales.reduce((sum, s) => sum + (s.totalAmount || 0), 0);
+        const salesCount = filteredSales.length;
         const avgOrderValue = totalRevenue / salesCount;
 
         // Group by product
-        const productStats = sales.reduce((acc: any, s) => {
+        const productStats = filteredSales.reduce((acc: any, s) => {
             const name = s.productName || "Unknown";
             if (!acc[name]) {
                 acc[name] = { name, count: 0, revenue: 0 };
@@ -50,7 +55,7 @@ export async function GET(req: Request) {
             .sort((a: any, b: any) => b.revenue - a.revenue)
             .slice(0, 5);
 
-        const recentSales = sales
+        const recentSales = filteredSales
             .sort((a, b) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime())
             .slice(0, 10);
 
@@ -62,7 +67,8 @@ export async function GET(req: Request) {
                 avgOrderValue,
                 topProducts,
                 recentSales,
-                filteredSales: sales.sort((a, b) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime())
+                filteredSales: filteredSales.sort((a, b) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime()),
+                supplierInfo: settings
             }
         });
     } catch (error: any) {
