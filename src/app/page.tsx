@@ -17,7 +17,7 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen font-sans selection:bg-primary/30 pb-28">
+    <main className="min-h-screen font-sans selection:bg-primary/30">
       {activeTab === "home" && (
         <div className="max-w-lg mx-auto animate-in fade-in zoom-in-95 duration-700">
           {/* Top Header */}
@@ -30,8 +30,11 @@ export default function HomePage() {
                 금가보석
               </h1>
               <div className="flex items-center gap-3">
-                <button className="bg-white/5 p-3 rounded-full border border-[#D4AF37]/30 hover:bg-[#D4AF37]/10 transition-colors gold-glow">
-                  <Bell size={28} className="text-[#D4AF37]" />
+                <button
+                  onClick={() => setActiveTab("settings")}
+                  className="bg-white/5 p-3 rounded-full border border-[#D4AF37]/30 hover:bg-[#D4AF37]/10 transition-colors gold-glow"
+                >
+                  <Settings size={28} className="text-[#D4AF37]" />
                 </button>
               </div>
             </div>
@@ -101,33 +104,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Bottom Nav - Korean & Large */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-[#0D0B14]/95 backdrop-blur-2xl border-t-2 border-[#D4AF37]/20 pb-10 pt-5 z-50">
-            <div className="max-w-lg mx-auto flex justify-around items-center px-6">
-              <button
-                onClick={() => setActiveTab("home")}
-                className="flex flex-col items-center gap-2 text-[#D4AF37] drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]"
-              >
-                <Home size={32} fill="currentColor" />
-                <span className="text-sm font-black tracking-wide">홈</span>
-              </button>
-              <div className="flex flex-col items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors">
-                <Database size={32} />
-                <span className="text-sm font-black tracking-wide">보관함</span>
-              </div>
-              <div className="flex flex-col items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors">
-                <Layers size={32} />
-                <span className="text-sm font-black tracking-wide">목록</span>
-              </div>
-              <button
-                onClick={() => setActiveTab("settings")}
-                className="flex flex-col items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors hover:text-[#D4AF37]"
-              >
-                <Settings size={32} />
-                <span className="text-sm font-black tracking-wide">설정</span>
-              </button>
-            </div>
-          </nav>
+
         </div>
       )}
 
