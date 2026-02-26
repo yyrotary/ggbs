@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, Phone, User, Calendar, Tag, Trash2, ArrowLeft, Loader2, Diamond, Hash, ChevronLeft, ChevronRight, X, MapPin, ReceiptText, FileText, Printer } from "lucide-react";
+import { Search, Phone, User, Calendar, Tag, Trash2, ArrowLeft, Loader2, Diamond, Hash, ChevronLeft, ChevronRight, X, MapPin, ReceiptText, FileText, Printer, Edit, Save } from "lucide-react";
 import TransactionStatement from "./TransactionStatement";
 
 export default function LookupScreen({ onBack }: { onBack: () => void }) {
@@ -14,6 +14,8 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
     // For specific customer grouping, it's better to group what we searched.
 
     const [printingCustomer, setPrintingCustomer] = useState<any | null>(null);
+    const [editingTx, setEditingTx] = useState<any | null>(null);
+    const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
 
     const [supplierInfo, setSupplierInfo] = useState<any>(null);
 
@@ -92,6 +94,54 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
         } catch (error) {
             console.error("Delete failed:", error);
             alert("서버 오류로 삭제하지 못했습니다.");
+        }
+    };
+
+    const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setEditingTx((prev: any) => ({
+            ...prev,
+            [name]: name === "unitPrice" || name === "quantity" ? Number(value) : value,
+        }));
+    };
+
+    const handleSubmitEdit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingTx) return;
+
+        setIsSubmittingEdit(true);
+        try {
+            // Recalculate amounts
+            const supplyAmount = (editingTx.unitPrice || 0) * (editingTx.quantity || 1);
+            const vat = Math.floor(supplyAmount * 0.1);
+            const totalAmount = supplyAmount + vat;
+
+            const payload = {
+                ...editingTx,
+                supplyAmount,
+                vat,
+                totalAmount
+            };
+
+            const response = await fetch("/api/update", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert("성공적으로 수정되었습니다.");
+                setEditingTx(null);
+                performSearch(searchTerm); // Refresh the list
+            } else {
+                alert("수정 실패: " + result.error);
+            }
+        } catch (error) {
+            console.error("Update failed:", error);
+            alert("서버 오류로 수정하지 못했습니다.");
+        } finally {
+            setIsSubmittingEdit(false);
         }
     };
 
@@ -303,13 +353,22 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <button
-                                                            onClick={() => handleDelete(tx.rowId)}
-                                                            className="p-3 text-red-400 opacity-20 group-hover/item:opacity-100 hover:bg-red-400/10 rounded-xl transition-all ml-4"
-                                                            title="삭제"
-                                                        >
-                                                            <Trash2 size={24} />
-                                                        </button>
+                                                        <div className="flex">
+                                                            <button
+                                                                onClick={() => setEditingTx(tx)}
+                                                                className="p-3 text-[#D4AF37] opacity-50 group-hover/item:opacity-100 hover:bg-[#D4AF37]/10 rounded-xl transition-all ml-4"
+                                                                title="수정"
+                                                            >
+                                                                <Edit size={24} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(tx.rowId)}
+                                                                className="p-3 text-red-400 opacity-50 group-hover/item:opacity-100 hover:bg-red-400/10 rounded-xl transition-all ml-2"
+                                                                title="삭제"
+                                                            >
+                                                                <Trash2 size={24} />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -327,17 +386,98 @@ export default function LookupScreen({ onBack }: { onBack: () => void }) {
                         </div>
                     )}
                 </div>
-            </main>
+            </main >
 
             {/* Print Modal */}
-            {printingCustomer && (
-                <TransactionStatement
-                    customer={printingCustomer}
-                    transactions={printingCustomer.transactions}
-                    supplierInfo={supplierInfo?.supplier_info} // Pass supplier info
-                    onClose={() => setPrintingCustomer(null)}
-                />
-            )}
+            {
+                printingCustomer && (
+                    <TransactionStatement
+                        customer={printingCustomer}
+                        transactions={printingCustomer.transactions}
+                        supplierInfo={supplierInfo?.supplier_info} // Pass supplier info
+                        onClose={() => setPrintingCustomer(null)}
+                    />
+                )
+            }
+
+            {/* Edit Modal */}
+            {
+                editingTx && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95">
+                        <div className="bg-[#1A1625] w-full max-w-lg rounded-3xl border border-[#D4AF37]/30 shadow-2xl flex flex-col max-h-[90vh]">
+                            <div className="flex justify-between items-center p-6 border-b border-white/5">
+                                <h3 className="text-xl font-black text-white flex items-center gap-2">
+                                    <Edit className="text-[#D4AF37]" size={24} /> 거래 내역 수정
+                                </h3>
+                                <button onClick={() => setEditingTx(null)} className="text-gray-400 hover:text-white">
+                                    <X size={28} />
+                                </button>
+                            </div>
+
+                            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+                                <form id="editForm" onSubmit={handleSubmitEdit} className="space-y-6">
+                                    {/* Transaction Type */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-[#D4AF37] font-black uppercase tracking-widest pl-1">거래 구분</label>
+                                        <div className="bg-white/5 p-1 rounded-2xl border border-[#D4AF37]/30 flex">
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingTx((prev: any) => ({ ...prev, transactionType: "판매", unitPrice: prev.unitPrice || 0, quantity: prev.quantity || 1 }))}
+                                                className={`flex-1 py-3 rounded-xl text-base font-black transition-all ${editingTx.transactionType === "판매" || !editingTx.transactionType ? "bg-[#D4AF37] text-[#0D0B14] shadow-lg" : "text-gray-400 hover:text-white"}`}
+                                            >
+                                                판매
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingTx((prev: any) => ({ ...prev, transactionType: "판매 외", unitPrice: 0, quantity: 0 }))}
+                                                className={`flex-1 py-3 rounded-xl text-base font-black transition-all ${editingTx.transactionType === "판매 외" ? "bg-[#D4AF37] text-[#0D0B14] shadow-lg" : "text-gray-400 hover:text-white"}`}
+                                            >
+                                                판매 외 (맡김 등)
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-[#D4AF37] font-black uppercase tracking-widest pl-1">판매일자</label>
+                                        <input type="date" name="saleDate" value={editingTx.saleDate} onChange={handleEditChange} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#D4AF37] focus:outline-none" required />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-[#D4AF37] font-black uppercase tracking-widest pl-1">물품명</label>
+                                        <input type="text" name="productName" value={editingTx.productName} onChange={handleEditChange} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#D4AF37] focus:outline-none" required />
+                                    </div>
+
+                                    {(editingTx.transactionType === "판매" || !editingTx.transactionType) && (
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs text-[#D4AF37] font-black uppercase tracking-widest pl-1">단가</label>
+                                                <input type="number" name="unitPrice" value={editingTx.unitPrice} onChange={handleEditChange} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#D4AF37] focus:outline-none" required />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs text-[#D4AF37] font-black uppercase tracking-widest pl-1">수량</label>
+                                                <input type="number" name="quantity" value={editingTx.quantity} onChange={handleEditChange} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#D4AF37] focus:outline-none" required />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-[#D4AF37] font-black uppercase tracking-widest pl-1">비고</label>
+                                        <textarea name="remarks" value={editingTx.remarks || ""} onChange={handleEditChange} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-[#D4AF37] focus:outline-none min-h-[100px]" />
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div className="p-6 border-t border-white/5 bg-white/5 shrink-0 rounded-b-3xl flex gap-3">
+                                <button onClick={() => setEditingTx(null)} className="flex-1 py-4 bg-white/10 text-white rounded-xl font-bold hover:bg-white/20 transition-all">
+                                    취소
+                                </button>
+                                <button form="editForm" type="submit" disabled={isSubmittingEdit} className="flex-1 py-4 bg-[#D4AF37] text-black rounded-xl font-bold hover:bg-[#F9E498] transition-all flex items-center justify-center gap-2">
+                                    {isSubmittingEdit ? <Loader2 className="animate-spin" size={20} /> : <><Save size={20} /> 저장</>}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
         </div>
     );
 }

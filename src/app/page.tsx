@@ -78,7 +78,7 @@ export default function HomePage() {
                     <Search size={40} strokeWidth={2.5} />
                   </div>
                   <div>
-                    <h3 className="text-3xl font-black text-white leading-snug">고객 조회</h3>
+                    <h3 className="text-3xl font-black text-white leading-snug">고객 조회 및 수정</h3>
                     <p className="text-slate-400 text-lg font-medium">이전 내역 찾아보기</p>
                   </div>
                 </div>

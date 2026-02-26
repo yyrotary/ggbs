@@ -162,6 +162,23 @@ export async function deleteRow(rowId: number) {
     });
 }
 
+export async function updateRow(rowId: number, values: any[]) {
+    const sheets = await getSheetsInstance();
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    const range = `Sheet1!A${rowId}:M${rowId}`;
+
+    const response = await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range,
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+            values: [values],
+        },
+    });
+
+    return response.data;
+}
+
 /**
  * Ensures that the "Settings" sheet exists.
  * If not, creates it and initializes with default simple_password = 123456.
